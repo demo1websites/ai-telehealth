@@ -1,7 +1,12 @@
-import { Heart } from "lucide-react";
+import { Heart, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const { user, role, signOut } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
@@ -19,8 +24,23 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="text-sm">Sign In</Button>
-          <Button className="rounded-full text-sm">Get Started</Button>
+          {user ? (
+            <>
+              <span className="text-sm text-muted-foreground capitalize">{role ?? "user"}</span>
+              <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
+                <LogOut className="h-4 w-4" /> Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" className="text-sm" onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+              <Button className="rounded-full text-sm" onClick={() => navigate("/auth")}>
+                Get Started
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
