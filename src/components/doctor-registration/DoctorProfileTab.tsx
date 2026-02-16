@@ -25,9 +25,9 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8">
       {/* Left: Personal Info + Address */}
-      <div className="flex-1 space-y-6">
+      <div className="space-y-6 min-w-0">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
           <div className="mt-1 h-px bg-border" />
@@ -151,7 +151,7 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
       </div>
 
       {/* Right: Photo & Signature */}
-      <div className="w-full lg:w-72 space-y-6">
+      <div className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Profile Photo & Signature</h3>
           <div className="mt-1 h-px bg-border" />
@@ -180,11 +180,9 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
         </div>
       </div>
 
-      {/* Continue button - full width on bottom */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4 lg:static lg:border-0 lg:p-0 lg:col-span-2">
-        <div className="container max-w-4xl flex justify-end">
-          <Button onClick={onContinue} className="rounded-full px-8">Continue to Education</Button>
-        </div>
+      {/* Continue button */}
+      <div className="col-span-full flex justify-end pt-4">
+        <Button onClick={onContinue} className="rounded-full px-8">Continue to Education</Button>
       </div>
     </div>
   );
