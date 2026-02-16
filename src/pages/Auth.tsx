@@ -105,16 +105,19 @@ const Auth = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Doctor tab — placeholder */}
+              {/* Doctor tab — link to registration page */}
               <TabsContent value="doctor">
                 <div className="rounded-lg border border-dashed border-border bg-muted/50 p-8 text-center">
                   <Stethoscope className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
                   <p className="text-sm font-medium text-foreground">
                     Doctor Registration
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Coming soon. Contact admin for doctor onboarding.
+                  <p className="mt-1 mb-4 text-sm text-muted-foreground">
+                    Complete your full profile to join as a healthcare provider.
                   </p>
+                  <Button onClick={() => navigate("/doctor-registration")} className="rounded-full">
+                    Register as Doctor
+                  </Button>
                 </div>
               </TabsContent>
 

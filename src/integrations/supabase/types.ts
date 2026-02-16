@@ -14,6 +14,132 @@ export type Database = {
   }
   public: {
     Tables: {
+      doctor_profiles: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          areas_of_expertise: string[]
+          city: string
+          clinic_address: string | null
+          clinic_name: string | null
+          college_name: string
+          consultation_fee: number
+          created_at: string
+          degree_certificate_url: string | null
+          degree_type: string
+          dob: string
+          email: string
+          full_name: string
+          gender: string
+          has_clinic: boolean
+          has_pg_degree: boolean
+          id: string
+          languages: string[]
+          medical_certificate_url: string | null
+          medical_council_name: string
+          medical_registration_number: string
+          mobile_number: string
+          pg_certificate_url: string | null
+          pg_college_name: string | null
+          pg_degree_type: string | null
+          pg_specialization: string | null
+          pg_year_of_completion: number | null
+          pincode: string
+          primary_specialization: string
+          profile_photo_url: string | null
+          registration_year: number | null
+          signature_url: string | null
+          state: string
+          updated_at: string
+          user_id: string
+          work_history: string | null
+          year_of_completion: number | null
+          years_of_experience: number
+        }
+        Insert: {
+          address_line1?: string
+          address_line2?: string | null
+          areas_of_expertise?: string[]
+          city?: string
+          clinic_address?: string | null
+          clinic_name?: string | null
+          college_name?: string
+          consultation_fee?: number
+          created_at?: string
+          degree_certificate_url?: string | null
+          degree_type?: string
+          dob: string
+          email: string
+          full_name: string
+          gender: string
+          has_clinic?: boolean
+          has_pg_degree?: boolean
+          id?: string
+          languages?: string[]
+          medical_certificate_url?: string | null
+          medical_council_name?: string
+          medical_registration_number?: string
+          mobile_number: string
+          pg_certificate_url?: string | null
+          pg_college_name?: string | null
+          pg_degree_type?: string | null
+          pg_specialization?: string | null
+          pg_year_of_completion?: number | null
+          pincode?: string
+          primary_specialization?: string
+          profile_photo_url?: string | null
+          registration_year?: number | null
+          signature_url?: string | null
+          state?: string
+          updated_at?: string
+          user_id: string
+          work_history?: string | null
+          year_of_completion?: number | null
+          years_of_experience?: number
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          areas_of_expertise?: string[]
+          city?: string
+          clinic_address?: string | null
+          clinic_name?: string | null
+          college_name?: string
+          consultation_fee?: number
+          created_at?: string
+          degree_certificate_url?: string | null
+          degree_type?: string
+          dob?: string
+          email?: string
+          full_name?: string
+          gender?: string
+          has_clinic?: boolean
+          has_pg_degree?: boolean
+          id?: string
+          languages?: string[]
+          medical_certificate_url?: string | null
+          medical_council_name?: string
+          medical_registration_number?: string
+          mobile_number?: string
+          pg_certificate_url?: string | null
+          pg_college_name?: string | null
+          pg_degree_type?: string | null
+          pg_specialization?: string | null
+          pg_year_of_completion?: number | null
+          pincode?: string
+          primary_specialization?: string
+          profile_photo_url?: string | null
+          registration_year?: number | null
+          signature_url?: string | null
+          state?: string
+          updated_at?: string
+          user_id?: string
+          work_history?: string | null
+          year_of_completion?: number | null
+          years_of_experience?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
