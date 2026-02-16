@@ -186,7 +186,7 @@ const DoctorRegistration = () => {
         </div>
       </header>
 
-      <div className="container max-w-4xl py-10">
+      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-foreground">Doctor Registration</h1>
           <p className="mt-2 text-muted-foreground">Complete your profile to join MediConnect as a healthcare provider</p>
