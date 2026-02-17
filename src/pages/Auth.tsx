@@ -40,7 +40,16 @@ const Auth = () => {
         });
         if (error) throw error;
         toast({ title: "Welcome back!", description: "You have signed in successfully." });
-        navigate("/");
+        // Redirect based on role
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
+          .maybeSingle();
+        const userRole = roleData?.role;
+        if (userRole === "admin") navigate("/admin");
+        else if (userRole === "doctor") navigate("/doctor-dashboard");
+        else navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
           email: form.email,

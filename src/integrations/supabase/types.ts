@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      doctor_availability: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          end_time: string
+          id: string
+          is_booked: boolean
+          slot_date: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          end_time: string
+          id?: string
+          is_booked?: boolean
+          slot_date: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          end_time?: string
+          id?: string
+          is_booked?: boolean
+          slot_date?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_availability_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_profiles: {
         Row: {
           address_line1: string
@@ -34,6 +72,7 @@ export type Database = {
           has_clinic: boolean
           has_pg_degree: boolean
           id: string
+          is_verified: boolean
           languages: string[]
           medical_certificate_url: string | null
           medical_council_name: string
@@ -75,6 +114,7 @@ export type Database = {
           has_clinic?: boolean
           has_pg_degree?: boolean
           id?: string
+          is_verified?: boolean
           languages?: string[]
           medical_certificate_url?: string | null
           medical_council_name?: string
@@ -116,6 +156,7 @@ export type Database = {
           has_clinic?: boolean
           has_pg_degree?: boolean
           id?: string
+          is_verified?: boolean
           languages?: string[]
           medical_certificate_url?: string | null
           medical_council_name?: string

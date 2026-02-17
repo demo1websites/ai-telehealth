@@ -26,6 +26,16 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              {role === "admin" && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-1.5">
+                  Admin Panel
+                </Button>
+              )}
+              {role === "doctor" && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/doctor-dashboard")} className="gap-1.5">
+                  Dashboard
+                </Button>
+              )}
               <span className="text-sm text-muted-foreground capitalize">{role ?? "user"}</span>
               <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
                 <LogOut className="h-4 w-4" /> Sign Out
