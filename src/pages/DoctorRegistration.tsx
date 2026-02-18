@@ -45,6 +45,11 @@ export interface DoctorFormData {
   hasClinic: boolean;
   clinicName: string;
   clinicAddress: string;
+  practiceType: string;
+  consultationMode: string;
+  availableDays: string[];
+  availableStartTime: string;
+  availableEndTime: string;
   // Medical Registration
   medicalRegNumber: string;
   medicalCouncilName: string;
@@ -62,7 +67,8 @@ const initialForm: DoctorFormData = {
   hasPgDegree: false, pgDegreeType: "", pgSpecialization: "", pgCollegeName: "",
   pgYearOfCompletion: "", pgCertificateFile: null,
   primarySpecialization: "", yearsOfExperience: "", areasOfExpertise: [], workHistory: "",
-  hasClinic: false, clinicName: "", clinicAddress: "",
+  hasClinic: false, clinicName: "", clinicAddress: "", practiceType: "", consultationMode: "Online",
+  availableDays: [], availableStartTime: "09:00", availableEndTime: "17:00",
   medicalRegNumber: "", medicalCouncilName: "", registrationYear: "",
   medicalCertificateFile: null, consultationFee: "500",
 };
@@ -152,6 +158,11 @@ const DoctorRegistration = () => {
         has_clinic: form.hasClinic,
         clinic_name: form.hasClinic ? form.clinicName : null,
         clinic_address: form.hasClinic ? form.clinicAddress : null,
+        practice_type: form.hasClinic ? form.practiceType : null,
+        consultation_mode: form.consultationMode,
+        available_days: form.availableDays,
+        available_start_time: form.availableStartTime,
+        available_end_time: form.availableEndTime,
         medical_registration_number: form.medicalRegNumber,
         medical_council_name: form.medicalCouncilName,
         registration_year: form.registrationYear ? parseInt(form.registrationYear) : null,
