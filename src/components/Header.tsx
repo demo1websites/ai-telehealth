@@ -36,6 +36,11 @@ const Header = () => {
                   Dashboard
                 </Button>
               )}
+              {role === "patient" && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/patient-dashboard")} className="gap-1.5">
+                  Dashboard
+                </Button>
+              )}
               <span className="text-sm text-muted-foreground capitalize">{role ?? "user"}</span>
               <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
                 <LogOut className="h-4 w-4" /> Sign Out

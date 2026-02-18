@@ -49,6 +49,7 @@ const Auth = () => {
         const userRole = roleData?.role;
         if (userRole === "admin") navigate("/admin");
         else if (userRole === "doctor") navigate("/doctor-dashboard");
+        else if (userRole === "patient") navigate("/patient-dashboard");
         else navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
