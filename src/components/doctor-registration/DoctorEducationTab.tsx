@@ -6,9 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, ArrowLeft, IndianRupee, Upload } from "lucide-react";
+import { GraduationCap, ArrowLeft, IndianRupee, Upload, Building2, Clock } from "lucide-react";
 import type { DoctorFormData } from "@/pages/DoctorRegistration";
 import FileUploadBox from "./FileUploadBox";
+
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const PRACTICE_TYPES = ["Private Practice", "Government Hospital", "Private Hospital", "Nursing Home", "Polyclinic", "Other"];
+const CONSULTATION_MODES = ["Online", "In-Person", "Both"];
 
 const DEGREE_TYPES = ["MBBS", "BDS", "BAMS", "BHMS", "BUMS", "BPT", "B.Sc Nursing"];
 const PG_DEGREE_TYPES = ["MD", "MS", "MDS", "DNB", "DM", "MCh", "M.Sc"];
@@ -198,17 +202,81 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
       </div>
 
       {form.hasClinic && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Clinic/Hospital Name</Label>
-            <Input value={form.clinicName} onChange={(e) => update("clinicName", e.target.value)} />
+        <div className="rounded-lg border border-border p-4 space-y-4">
+          <div className="flex items-center gap-2 text-primary">
+            <Building2 className="h-5 w-5" />
+            <h4 className="font-semibold">Clinic / Hospital Details</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Clinic / Hospital Name *</Label>
+              <Input placeholder="City Hospital" value={form.clinicName} onChange={(e) => update("clinicName", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Practice Type *</Label>
+              <Select value={form.practiceType} onValueChange={(v) => update("practiceType", v)}>
+                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                <SelectContent>
+                  {PRACTICE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="space-y-2">
-            <Label>Clinic Address</Label>
-            <Input value={form.clinicAddress} onChange={(e) => update("clinicAddress", e.target.value)} />
+            <Label>Clinic Address *</Label>
+            <Textarea placeholder="Full address of your clinic/hospital" value={form.clinicAddress} onChange={(e) => update("clinicAddress", e.target.value)} rows={2} />
           </div>
         </div>
       )}
+
+      {/* Consultation Mode & Availability */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-foreground">Consultation & Availability</h3>
+        <div className="h-px bg-border" />
+
+        <div className="space-y-2">
+          <Label>Consultation Mode *</Label>
+          <Select value={form.consultationMode} onValueChange={(v) => update("consultationMode", v)}>
+            <SelectTrigger className="max-w-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CONSULTATION_MODES.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Available Days</Label>
+          <div className="flex flex-wrap gap-2">
+            {DAYS.map((day) => (
+              <Badge
+                key={day}
+                variant={form.availableDays.includes(day) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => {
+                  if (form.availableDays.includes(day)) {
+                    update("availableDays", form.availableDays.filter((d) => d !== day));
+                  } else {
+                    update("availableDays", [...form.availableDays, day]);
+                  }
+                }}
+              >
+                {day}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1"><Clock className="h-4 w-4" /> Available Start Time</Label>
+            <Input type="time" value={form.availableStartTime} onChange={(e) => update("availableStartTime", e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1"><Clock className="h-4 w-4" /> Available End Time</Label>
+            <Input type="time" value={form.availableEndTime} onChange={(e) => update("availableEndTime", e.target.value)} />
+          </div>
+        </div>
+      </div>
 
       {/* Medical Registration */}
       <div className="space-y-4">

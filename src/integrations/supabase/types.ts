@@ -57,11 +57,15 @@ export type Database = {
           address_line1: string
           address_line2: string | null
           areas_of_expertise: string[]
+          available_days: string[] | null
+          available_end_time: string | null
+          available_start_time: string | null
           city: string
           clinic_address: string | null
           clinic_name: string | null
           college_name: string
           consultation_fee: number
+          consultation_mode: string | null
           created_at: string
           degree_certificate_url: string | null
           degree_type: string
@@ -84,6 +88,7 @@ export type Database = {
           pg_specialization: string | null
           pg_year_of_completion: number | null
           pincode: string
+          practice_type: string | null
           primary_specialization: string
           profile_photo_url: string | null
           registration_year: number | null
@@ -99,11 +104,15 @@ export type Database = {
           address_line1?: string
           address_line2?: string | null
           areas_of_expertise?: string[]
+          available_days?: string[] | null
+          available_end_time?: string | null
+          available_start_time?: string | null
           city?: string
           clinic_address?: string | null
           clinic_name?: string | null
           college_name?: string
           consultation_fee?: number
+          consultation_mode?: string | null
           created_at?: string
           degree_certificate_url?: string | null
           degree_type?: string
@@ -126,6 +135,7 @@ export type Database = {
           pg_specialization?: string | null
           pg_year_of_completion?: number | null
           pincode?: string
+          practice_type?: string | null
           primary_specialization?: string
           profile_photo_url?: string | null
           registration_year?: number | null
@@ -141,11 +151,15 @@ export type Database = {
           address_line1?: string
           address_line2?: string | null
           areas_of_expertise?: string[]
+          available_days?: string[] | null
+          available_end_time?: string | null
+          available_start_time?: string | null
           city?: string
           clinic_address?: string | null
           clinic_name?: string | null
           college_name?: string
           consultation_fee?: number
+          consultation_mode?: string | null
           created_at?: string
           degree_certificate_url?: string | null
           degree_type?: string
@@ -168,6 +182,7 @@ export type Database = {
           pg_specialization?: string | null
           pg_year_of_completion?: number | null
           pincode?: string
+          practice_type?: string | null
           primary_specialization?: string
           profile_photo_url?: string | null
           registration_year?: number | null
