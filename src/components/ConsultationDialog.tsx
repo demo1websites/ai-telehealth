@@ -25,13 +25,31 @@ const ConsultationDialog = ({ open, onOpenChange }: ConsultationDialogProps) => 
   const [mobile, setMobile] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
 
+  const isHindi = language === "hindi";
+
+  const t = {
+    title: isHindi ? "AI स्वास्थ्य परामर्श" : "AI Health Consultation",
+    subtitle: isHindi ? "हमारे AI सहायक से प्रारंभिक स्वास्थ्य जानकारी प्राप्त करें" : "Get preliminary health insights from our AI assistant",
+    langLabel: isHindi ? "पसंदीदा भाषा" : "Preferred Language",
+    nameLabel: isHindi ? "पूरा नाम" : "Full Name",
+    namePlaceholder: isHindi ? "अपना पूरा नाम दर्ज करें" : "Enter your full name",
+    mobileLabel: isHindi ? "मोबाइल नंबर" : "Mobile Number",
+    mobilePlaceholder: isHindi ? "10 अंकों का मोबाइल नंबर" : "10-digit mobile number",
+    startBtn: isHindi ? "परामर्श शुरू करें" : "Start Consultation",
+    disclaimer: isHindi ? "यह केवल सूचनात्मक उद्देश्यों के लिए है। चिकित्सा सलाह के लिए हमेशा एक वास्तविक डॉक्टर से परामर्श करें।" : "This is for informational purposes only. Always consult a real doctor for medical advice.",
+    reqTitle: isHindi ? "आवश्यक" : "Required",
+    reqDesc: isHindi ? "कृपया अपना पूरा नाम दर्ज करें।" : "Please enter your full name.",
+    invTitle: isHindi ? "अमान्य" : "Invalid",
+    invDesc: isHindi ? "कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें।" : "Please enter a valid 10-digit mobile number.",
+  };
+
   const handleStart = () => {
     if (!fullName.trim()) {
-      toast({ title: "Required", description: "Please enter your full name.", variant: "destructive" });
+      toast({ title: t.reqTitle, description: t.reqDesc, variant: "destructive" });
       return;
     }
     if (!/^\d{10}$/.test(mobile)) {
-      toast({ title: "Invalid", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+      toast({ title: t.invTitle, description: t.invDesc, variant: "destructive" });
       return;
     }
     onOpenChange(false);
