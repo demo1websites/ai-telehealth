@@ -70,17 +70,15 @@ const ConsultationDialog = ({ open, onOpenChange }: ConsultationDialogProps) => 
             <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary">
               <Heart className="h-7 w-7 text-primary-foreground" />
             </div>
-            <DialogTitle className="text-xl font-bold">AI Health Consultation</DialogTitle>
-            <DialogDescription>
-              Get preliminary health insights from our AI assistant
-            </DialogDescription>
+            <DialogTitle className="text-xl font-bold">{t.title}</DialogTitle>
+            <DialogDescription>{t.subtitle}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 pt-2">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Globe className="h-4 w-4" />
-                Preferred Language
+                {t.langLabel}
               </div>
               <RadioGroup value={language} onValueChange={setLanguage} className="flex gap-4">
                 <div className="flex items-center gap-2">
@@ -95,21 +93,21 @@ const ConsultationDialog = ({ open, onOpenChange }: ConsultationDialogProps) => 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your full name" className="border-primary/30 focus-visible:ring-primary" />
+              <Label htmlFor="fullName">{t.nameLabel}</Label>
+              <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t.namePlaceholder} className="border-primary/30 focus-visible:ring-primary" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mobile">Mobile Number</Label>
-              <Input id="mobile" value={mobile} onChange={e => setMobile(e.target.value)} placeholder="10-digit mobile number" className="border-border" />
+              <Label htmlFor="mobile">{t.mobileLabel}</Label>
+              <Input id="mobile" value={mobile} onChange={e => setMobile(e.target.value)} placeholder={t.mobilePlaceholder} className="border-border" />
             </div>
 
             <Button onClick={handleStart} className="w-full rounded-full bg-gradient-to-r from-primary to-[hsl(190,80%,45%)] text-base font-semibold text-primary-foreground hover:opacity-90">
-              Start Consultation
+              {t.startBtn}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              This is for informational purposes only. Always consult a real doctor for medical advice.
+              {t.disclaimer}
             </p>
           </div>
         </DialogContent>
