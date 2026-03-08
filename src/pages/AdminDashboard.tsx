@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import DashboardLayout, { SidebarItem } from "@/components/dashboard/DashboardLayout";
+import DashboardLayout, { SidebarItem, SidebarProfile } from "@/components/dashboard/DashboardLayout";
 import StatCard from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,30 +61,32 @@ interface DoctorProfile {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { role, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("pending");
-  const [activeView, setActiveView] = useState<"overview" | "doctors">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "doctors" | "profile">("overview");
+  const [adminProfile, setAdminProfile] = useState<{ full_name: string; email: string; mobile_number: string; dob: string } | null>(null);
 
   useEffect(() => {
     if (!authLoading && role !== "admin") navigate("/");
   }, [role, authLoading, navigate]);
 
+  useEffect(() => {
+    if (user && role === "admin") {
+      fetchDoctors();
+      supabase.from("profiles").select("full_name, email, mobile_number, dob").eq("id", user.id).maybeSingle()
+        .then(({ data }) => { if (data) setAdminProfile(data); });
+    }
+  }, [user, role]);
+
   const fetchDoctors = async () => {
-    const { data, error } = await supabase
-      .from("doctor_profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("doctor_profiles").select("*").order("created_at", { ascending: false });
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else setDoctors(data || []);
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (role === "admin") fetchDoctors();
-  }, [role]);
 
   const updateVerification = async (id: string, verified: boolean) => {
     const { error } = await supabase.from("doctor_profiles").update({ is_verified: verified }).eq("id", id);
@@ -95,11 +97,15 @@ const AdminDashboard = () => {
   const pendingDoctors = doctors.filter((d) => !d.is_verified);
   const verifiedDoctors = doctors.filter((d) => d.is_verified);
 
+  const sidebarProfile: SidebarProfile | undefined = adminProfile
+    ? { name: adminProfile.full_name, subtitle: "Administrator" }
+    : undefined;
+
   const sidebarItems: SidebarItem[] = [
-    { label: "Dashboard", icon: LayoutDashboard, onClick: () => setActiveView("overview") },
-    { label: "Doctor Verification", icon: ShieldCheck, onClick: () => setActiveView("doctors"), badge: pendingDoctors.length || undefined },
+    { label: "Dashboard", icon: LayoutDashboard, onClick: () => setActiveView("overview"), isActive: activeView === "overview" },
+    { label: "Doctor Verification", icon: ShieldCheck, onClick: () => setActiveView("doctors"), badge: pendingDoctors.length || undefined, isActive: activeView === "doctors" },
+    { label: "My Profile", icon: UserCog, onClick: () => setActiveView("profile"), isActive: activeView === "profile" },
     { label: "Manage Users", icon: Users, onClick: () => {} },
-    { label: "Manage Profiles", icon: UserCog, onClick: () => {} },
     { label: "Appointments", icon: Calendar, onClick: () => {} },
   ];
 
@@ -165,9 +171,7 @@ const AdminDashboard = () => {
             <h4 className="text-sm font-semibold text-foreground mb-2">Practice</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <p><span className="text-muted-foreground">Mode:</span> {doc.consultation_mode || "N/A"}</p>
-              {doc.has_clinic && (
-                <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" /> {doc.clinic_name}</p>
-              )}
+              {doc.has_clinic && <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" /> {doc.clinic_name}</p>}
               {doc.available_days?.length > 0 && (
                 <div className="col-span-full flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Available:</span>
@@ -227,21 +231,19 @@ const AdminDashboard = () => {
   );
 
   return (
-    <DashboardLayout title="Admin Dashboard" sidebarItems={sidebarItems}>
+    <DashboardLayout title="Admin Dashboard" sidebarItems={sidebarItems} sidebarProfile={sidebarProfile}>
       {activeView === "overview" && (
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Admin Overview 👋</h2>
             <p className="text-sm text-muted-foreground">Manage doctors, users, and platform settings.</p>
           </div>
-
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Total Doctors" value={doctors.length} icon={Stethoscope} />
             <StatCard label="Pending Verification" value={pendingDoctors.length} icon={Clock} />
             <StatCard label="Verified Doctors" value={verifiedDoctors.length} icon={ShieldCheck} />
             <StatCard label="Total Users" value={doctors.length} icon={Users} />
           </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setActiveView("doctors")}>
               <CardContent className="flex items-center gap-4 p-5">
@@ -252,9 +254,7 @@ const AdminDashboard = () => {
                   <p className="font-semibold text-foreground">Doctor Verification</p>
                   <p className="text-xs text-muted-foreground">Review and approve doctor registrations</p>
                 </div>
-                {pendingDoctors.length > 0 && (
-                  <Badge variant="destructive" className="ml-auto">{pendingDoctors.length}</Badge>
-                )}
+                {pendingDoctors.length > 0 && <Badge variant="destructive" className="ml-auto">{pendingDoctors.length}</Badge>}
               </CardContent>
             </Card>
             <Card className="cursor-pointer transition-shadow hover:shadow-md">
@@ -301,6 +301,34 @@ const AdminDashboard = () => {
               )}
             </TabsContent>
           </Tabs>
+        </div>
+      )}
+
+      {activeView === "profile" && adminProfile && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">My Profile</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <UserCog className="h-5 w-5 text-primary" /> Admin Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[
+                  { label: "Full Name", value: adminProfile.full_name },
+                  { label: "Email", value: adminProfile.email },
+                  { label: "Mobile", value: adminProfile.mobile_number },
+                  { label: "Date of Birth", value: adminProfile.dob },
+                ].map((f) => (
+                  <div key={f.label}>
+                    <p className="text-xs text-muted-foreground">{f.label}</p>
+                    <p className="font-medium text-foreground">{f.value}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </DashboardLayout>

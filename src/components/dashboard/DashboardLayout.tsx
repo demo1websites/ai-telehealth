@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Heart, LogOut, Menu, X, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Heart, LogOut, Menu, X, ChevronRight, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface SidebarItem {
@@ -11,15 +10,23 @@ export interface SidebarItem {
   path?: string;
   onClick?: () => void;
   badge?: string | number;
+  isActive?: boolean;
+}
+
+export interface SidebarProfile {
+  name: string;
+  subtitle: string;
+  avatarUrl?: string | null;
 }
 
 interface DashboardLayoutProps {
   title: string;
   sidebarItems: SidebarItem[];
+  sidebarProfile?: SidebarProfile;
   children: React.ReactNode;
 }
 
-const DashboardLayout = ({ title, sidebarItems, children }: DashboardLayoutProps) => {
+const DashboardLayout = ({ title, sidebarItems, sidebarProfile, children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
@@ -33,12 +40,10 @@ const DashboardLayout = ({ title, sidebarItems, children }: DashboardLayoutProps
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-sidebar-border bg-sidebar-background transition-transform duration-200 lg:static lg:translate-x-0",
@@ -56,13 +61,36 @@ const DashboardLayout = ({ title, sidebarItems, children }: DashboardLayoutProps
           </button>
         </div>
 
+        {/* Profile card */}
+        {sidebarProfile && (
+          <div className="border-b border-sidebar-border px-4 py-4">
+            <div className="flex items-center gap-3">
+              {sidebarProfile.avatarUrl ? (
+                <img
+                  src={sidebarProfile.avatarUrl}
+                  alt={sidebarProfile.name}
+                  className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-primary/20"
+                />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-sidebar-foreground">{sidebarProfile.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{sidebarProfile.subtitle}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Nav items */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
           </p>
           {sidebarItems.map((item) => {
-            const isActive = item.path && location.pathname === item.path;
+            const isActive = item.isActive || (item.path && location.pathname === item.path);
             return (
               <button
                 key={item.label}
@@ -99,17 +127,13 @@ const DashboardLayout = ({ title, sidebarItems, children }: DashboardLayoutProps
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col">
-        {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur lg:px-8">
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
         </header>
-
-        {/* Page content */}
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
     </div>
