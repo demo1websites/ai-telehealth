@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -6,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, ArrowLeft, IndianRupee, Upload, Building2, Clock } from "lucide-react";
+import { GraduationCap, ArrowLeft, IndianRupee, Upload, Building2, Clock, X } from "lucide-react";
 import type { DoctorFormData } from "@/pages/DoctorRegistration";
 import FileUploadBox from "./FileUploadBox";
+import SelectWithOther from "./SelectWithOther";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const PRACTICE_TYPES = ["Private Practice", "Government Hospital", "Private Hospital", "Nursing Home", "Polyclinic", "Other"];
+const PRACTICE_TYPES = ["Private Practice", "Government Hospital", "Private Hospital", "Nursing Home", "Polyclinic"];
 const CONSULTATION_MODES = ["Online", "In-Person", "Both"];
 
 const DEGREE_TYPES = ["MBBS", "BDS", "BAMS", "BHMS", "BUMS", "BPT", "B.Sc Nursing"];
@@ -31,6 +33,8 @@ interface Props {
 }
 
 const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) => {
+  const [customExpertise, setCustomExpertise] = useState("");
+
   const toggleExpertise = (area: string) => {
     if (form.areasOfExpertise.includes(area)) {
       update("areasOfExpertise", form.areasOfExpertise.filter((a) => a !== area));
@@ -38,6 +42,17 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
       update("areasOfExpertise", [...form.areasOfExpertise, area]);
     }
   };
+
+  const addCustomExpertise = () => {
+    const trimmed = customExpertise.trim();
+    if (trimmed && !form.areasOfExpertise.includes(trimmed)) {
+      update("areasOfExpertise", [...form.areasOfExpertise, trimmed]);
+      setCustomExpertise("");
+    }
+  };
+
+  // Identify custom expertise items (not in predefined list)
+  const customExpertiseItems = form.areasOfExpertise.filter((a) => !AREAS_OF_EXPERTISE.includes(a));
 
   return (
     <div className="space-y-8">
@@ -51,12 +66,13 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label>Degree Type *</Label>
-            <Select value={form.degreeType} onValueChange={(v) => update("degreeType", v)}>
-              <SelectTrigger><SelectValue placeholder="Select degree" /></SelectTrigger>
-              <SelectContent>
-                {DEGREE_TYPES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SelectWithOther
+              value={form.degreeType}
+              onValueChange={(v) => update("degreeType", v)}
+              placeholder="Select degree"
+              options={DEGREE_TYPES}
+              otherPlaceholder="Type degree name..."
+            />
           </div>
           <div className="space-y-2">
             <Label>College / University Name *</Label>
@@ -102,21 +118,23 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>PG Degree Type *</Label>
-                <Select value={form.pgDegreeType} onValueChange={(v) => update("pgDegreeType", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select PG degree" /></SelectTrigger>
-                  <SelectContent>
-                    {PG_DEGREE_TYPES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SelectWithOther
+                  value={form.pgDegreeType}
+                  onValueChange={(v) => update("pgDegreeType", v)}
+                  placeholder="Select PG degree"
+                  options={PG_DEGREE_TYPES}
+                  otherPlaceholder="Type PG degree name..."
+                />
               </div>
               <div className="space-y-2">
                 <Label>Specialization *</Label>
-                <Select value={form.pgSpecialization} onValueChange={(v) => update("pgSpecialization", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger>
-                  <SelectContent>
-                    {SPECIALIZATIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SelectWithOther
+                  value={form.pgSpecialization}
+                  onValueChange={(v) => update("pgSpecialization", v)}
+                  placeholder="Select specialization"
+                  options={SPECIALIZATIONS}
+                  otherPlaceholder="Type specialization..."
+                />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -157,12 +175,13 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Primary Specialization *</Label>
-            <Select value={form.primarySpecialization} onValueChange={(v) => update("primarySpecialization", v)}>
-              <SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger>
-              <SelectContent>
-                {SPECIALIZATIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SelectWithOther
+              value={form.primarySpecialization}
+              onValueChange={(v) => update("primarySpecialization", v)}
+              placeholder="Select specialization"
+              options={SPECIALIZATIONS}
+              otherPlaceholder="Type specialization..."
+            />
           </div>
           <div className="space-y-2">
             <Label>Total Years of Experience *</Label>
@@ -183,6 +202,31 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
                 {area}
               </Badge>
             ))}
+            {/* Show custom added items */}
+            {customExpertiseItems.map((area) => (
+              <Badge
+                key={area}
+                variant="default"
+                className="cursor-pointer gap-1"
+                onClick={() => toggleExpertise(area)}
+              >
+                {area}
+                <X className="h-3 w-3" />
+              </Badge>
+            ))}
+          </div>
+          {/* Add custom expertise */}
+          <div className="flex gap-2 mt-2">
+            <Input
+              placeholder="Add other expertise..."
+              value={customExpertise}
+              onChange={(e) => setCustomExpertise(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomExpertise(); } }}
+              className="max-w-xs"
+            />
+            <Button type="button" size="sm" variant="outline" onClick={addCustomExpertise} disabled={!customExpertise.trim()}>
+              Add
+            </Button>
           </div>
         </div>
 
@@ -214,12 +258,13 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
             </div>
             <div className="space-y-2">
               <Label>Practice Type *</Label>
-              <Select value={form.practiceType} onValueChange={(v) => update("practiceType", v)}>
-                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                <SelectContent>
-                  {PRACTICE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <SelectWithOther
+                value={form.practiceType}
+                onValueChange={(v) => update("practiceType", v)}
+                placeholder="Select type"
+                options={PRACTICE_TYPES}
+                otherPlaceholder="Type practice type..."
+              />
             </div>
           </div>
           <div className="space-y-2">
@@ -236,12 +281,13 @@ const DoctorEducationTab = ({ form, update, onBack, onSubmit, loading }: Props) 
 
         <div className="space-y-2">
           <Label>Consultation Mode *</Label>
-          <Select value={form.consultationMode} onValueChange={(v) => update("consultationMode", v)}>
-            <SelectTrigger className="max-w-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CONSULTATION_MODES.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <SelectWithOther
+            value={form.consultationMode}
+            onValueChange={(v) => update("consultationMode", v)}
+            placeholder="Select mode"
+            options={CONSULTATION_MODES}
+            otherPlaceholder="Type consultation mode..."
+          />
         </div>
 
         <div className="space-y-2">
