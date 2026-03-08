@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Calendar, Phone, Mail, Lock, MapPin, ImageIcon, PenTool, X } from "lucide-react";
 import type { DoctorFormData } from "@/pages/DoctorRegistration";
 import FileUploadBox from "./FileUploadBox";
+import SelectWithOther from "./SelectWithOther";
 
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam", "Bengali", "Marathi", "Gujarati", "Punjabi", "Urdu"];
 const STATES = ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
@@ -17,12 +19,24 @@ interface Props {
 }
 
 const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
+  const [customLang, setCustomLang] = useState("");
+
   const addLanguage = (lang: string) => {
-    if (!form.languages.includes(lang)) update("languages", [...form.languages, lang]);
+    if (lang === "__other__") return;
+    if (lang && !form.languages.includes(lang)) update("languages", [...form.languages, lang]);
   };
   const removeLanguage = (lang: string) => {
     update("languages", form.languages.filter((l) => l !== lang));
   };
+  const addCustomLanguage = () => {
+    const trimmed = customLang.trim();
+    if (trimmed && !form.languages.includes(trimmed)) {
+      update("languages", [...form.languages, trimmed]);
+      setCustomLang("");
+    }
+  };
+
+  const [showOtherLang, setShowOtherLang] = useState(false);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8">
@@ -53,14 +67,13 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Gender *</Label>
-            <Select value={form.gender} onValueChange={(v) => update("gender", v)}>
-              <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            <SelectWithOther
+              value={form.gender}
+              onValueChange={(v) => update("gender", v)}
+              placeholder="Select gender"
+              options={["Male", "Female"]}
+              otherPlaceholder="Specify gender..."
+            />
           </div>
           <div className="space-y-2">
             <Label>Mobile Number *</Label>
@@ -100,14 +113,34 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
               </Badge>
             ))}
           </div>
-          <Select onValueChange={addLanguage}>
+          <Select onValueChange={(v) => {
+            if (v === "__other__") {
+              setShowOtherLang(true);
+            } else {
+              addLanguage(v);
+            }
+          }}>
             <SelectTrigger><SelectValue placeholder="Add language" /></SelectTrigger>
             <SelectContent>
               {LANGUAGES.filter((l) => !form.languages.includes(l)).map((lang) => (
                 <SelectItem key={lang} value={lang}>{lang}</SelectItem>
               ))}
+              <SelectItem value="__other__">Other</SelectItem>
             </SelectContent>
           </Select>
+          {showOtherLang && (
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder="Type language name..."
+                value={customLang}
+                onChange={(e) => setCustomLang(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomLanguage(); } }}
+                autoFocus
+              />
+              <Button type="button" size="sm" onClick={() => { addCustomLanguage(); }}>Add</Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => { setShowOtherLang(false); setCustomLang(""); }}>Cancel</Button>
+            </div>
+          )}
         </div>
 
         {/* Address */}
@@ -135,12 +168,13 @@ const DoctorProfileTab = ({ form, update, onContinue }: Props) => {
             </div>
             <div className="space-y-2">
               <Label>State *</Label>
-              <Select value={form.state} onValueChange={(v) => update("state", v)}>
-                <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
-                <SelectContent>
-                  {STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <SelectWithOther
+                value={form.state}
+                onValueChange={(v) => update("state", v)}
+                placeholder="Select state"
+                options={STATES}
+                otherPlaceholder="Type state name..."
+              />
             </div>
             <div className="space-y-2">
               <Label>Pincode *</Label>
