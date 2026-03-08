@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
+import DashboardLayout, { SidebarItem } from "@/components/dashboard/DashboardLayout";
+import StatCard from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Mail, Phone, MapPin, GraduationCap, Stethoscope, Building2, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard, UserCog, Calendar, Clock, Stethoscope,
+  Mail, Phone, MapPin, GraduationCap, Building2, Users, DollarSign,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import DoctorScheduleManager from "@/components/doctor-dashboard/DoctorScheduleManager";
 
@@ -46,6 +51,7 @@ const DoctorDashboard = () => {
   const { user, role, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<"overview" | "profile" | "schedule">("overview");
 
   useEffect(() => {
     if (!authLoading && role !== "doctor") navigate("/");
@@ -66,6 +72,12 @@ const DoctorDashboard = () => {
     setLoading(false);
   };
 
+  const sidebarItems: SidebarItem[] = [
+    { label: "Dashboard", icon: LayoutDashboard, onClick: () => setActiveView("overview") },
+    { label: "My Profile", icon: UserCog, onClick: () => setActiveView("profile") },
+    { label: "Manage Schedule", icon: Calendar, onClick: () => setActiveView("schedule") },
+  ];
+
   if (authLoading || loading) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading...</div>;
   }
@@ -85,81 +97,110 @@ const DoctorDashboard = () => {
           <Clock className="h-8 w-8 text-destructive" />
         </div>
         <h2 className="text-xl font-semibold text-foreground">Verification Pending</h2>
-        <p className="text-muted-foreground max-w-md">Your account is under review. An admin will verify your profile shortly. You'll be able to access your dashboard once verified.</p>
+        <p className="text-muted-foreground max-w-md">Your account is under review. An admin will verify your profile shortly.</p>
         <Button variant="outline" onClick={() => { supabase.auth.signOut(); navigate("/"); }}>Sign Out</Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="container flex h-16 items-center justify-between">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-              <Heart className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">Doctor Dashboard</span>
+    <DashboardLayout title="Doctor Dashboard" sidebarItems={sidebarItems}>
+      {activeView === "overview" && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Welcome, Dr. {profile.full_name} 👋</h2>
+            <p className="text-sm text-muted-foreground">{profile.primary_specialization || "General Practitioner"}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => { supabase.auth.signOut(); navigate("/"); }}>Sign Out</Button>
-        </div>
-      </header>
 
-      <div className="container max-w-6xl py-10 space-y-8">
-        {/* Profile Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              {profile.profile_photo_url ? (
-                <img src={profile.profile_photo_url} alt="" className="h-14 w-14 rounded-full object-cover" />
-              ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                  <Stethoscope className="h-7 w-7 text-muted-foreground" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Experience" value={`${profile.years_of_experience} yrs`} icon={Stethoscope} />
+            <StatCard label="Consultation Fee" value={`₹${profile.consultation_fee}`} icon={DollarSign} />
+            <StatCard label="Patients Today" value={0} icon={Users} />
+            <StatCard label="Upcoming Slots" value={0} icon={Calendar} />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setActiveView("profile")}>
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <UserCog className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Manage Profile</p>
+                  <p className="text-xs text-muted-foreground">View and update your information</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setActiveView("schedule")}>
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Manage Appointments</p>
+                  <p className="text-xs text-muted-foreground">Set your availability and view bookings</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeView === "profile" && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">My Profile</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg">
+                {profile.profile_photo_url ? (
+                  <img src={profile.profile_photo_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+                    <Stethoscope className="h-7 w-7 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <span>{profile.full_name}</span>
+                  <p className="text-sm font-normal text-muted-foreground">{profile.primary_specialization}</p>
+                </div>
+                <Badge className="ml-auto">Verified</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {profile.email}</p>
+                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {profile.mobile_number}</p>
+                <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {profile.city}, {profile.state}</p>
+                <p className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-muted-foreground" /> {profile.degree_type} - {profile.college_name}</p>
+                <p><span className="text-muted-foreground">Reg:</span> {profile.medical_registration_number}</p>
+                <p><span className="text-muted-foreground">Experience:</span> {profile.years_of_experience} years</p>
+                <p><span className="text-muted-foreground">Fee:</span> ₹{profile.consultation_fee}</p>
+                <p><span className="text-muted-foreground">Languages:</span> {profile.languages.join(", ")}</p>
+                {profile.has_clinic && (
+                  <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" /> {profile.clinic_name}</p>
+                )}
+              </div>
+              {profile.areas_of_expertise.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1">
+                  {profile.areas_of_expertise.map((a) => <Badge key={a} variant="secondary" className="text-xs">{a}</Badge>)}
                 </div>
               )}
-              <div>
-                <span className="text-xl">{profile.full_name}</span>
-                <p className="text-sm font-normal text-muted-foreground">{profile.primary_specialization || "General Practitioner"}</p>
-              </div>
-              <Badge className="ml-auto">Verified</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-              <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {profile.email}</p>
-              <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {profile.mobile_number}</p>
-              <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {profile.city}, {profile.state}</p>
-              <p className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-muted-foreground" /> {profile.degree_type} - {profile.college_name}</p>
-              <p><span className="text-muted-foreground">Reg:</span> {profile.medical_registration_number}</p>
-              <p><span className="text-muted-foreground">Experience:</span> {profile.years_of_experience} years</p>
-              <p><span className="text-muted-foreground">Fee:</span> ₹{profile.consultation_fee}</p>
-              <p><span className="text-muted-foreground">Languages:</span> {profile.languages.join(", ")}</p>
-              {profile.has_clinic && (
-                <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" /> {profile.clinic_name}</p>
-              )}
-            </div>
-            {profile.areas_of_expertise.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-3">
-                {profile.areas_of_expertise.map((a) => <Badge key={a} variant="secondary" className="text-xs">{a}</Badge>)}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-        {/* Appointment Schedule Manager */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Manage Appointment Schedule</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DoctorScheduleManager doctorId={profile.id} />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      {activeView === "schedule" && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">Manage Schedule</h2>
+          <Card>
+            <CardContent className="pt-6">
+              <DoctorScheduleManager doctorId={profile.id} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </DashboardLayout>
   );
 };
 

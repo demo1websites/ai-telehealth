@@ -1,18 +1,13 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardLayout, { SidebarItem } from "@/components/dashboard/DashboardLayout";
+import StatCard from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  User,
-  Bot,
-  FileText,
-  CalendarCheck,
-  MessageSquareHeart,
-  LifeBuoy,
-  ChevronRight,
+  User, Bot, FileText, CalendarCheck, MessageSquareHeart, LifeBuoy,
+  LayoutDashboard, UserCog, Calendar,
 } from "lucide-react";
 
 interface ProfileData {
@@ -22,44 +17,11 @@ interface ProfileData {
   dob: string;
 }
 
-const dashboardItems = [
-  {
-    label: "AI Chats",
-    description: "Get instant health guidance from our AI assistant",
-    icon: Bot,
-    path: "/ai-chat",
-  },
-  {
-    label: "Medical Reports",
-    description: "View and download your medical reports",
-    icon: FileText,
-    path: "/medical-reports",
-  },
-  {
-    label: "Your Appointments",
-    description: "Manage upcoming and past appointments",
-    icon: CalendarCheck,
-    path: "/appointments",
-  },
-  {
-    label: "Feedback",
-    description: "Share your experience and suggestions",
-    icon: MessageSquareHeart,
-    path: "/feedback",
-  },
-  {
-    label: "Support",
-    description: "Get help from our support team",
-    icon: LifeBuoy,
-    path: "/support",
-  },
-];
-
 const PatientDashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [showProfile, setShowProfile] = useState(false);
+  const [activeView, setActiveView] = useState<"overview" | "profile" | "appointments">("overview");
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -72,10 +34,18 @@ const PatientDashboard = () => {
       .select("full_name, email, mobile_number, dob")
       .eq("id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        if (data) setProfile(data);
-      });
+      .then(({ data }) => { if (data) setProfile(data); });
   }, [user]);
+
+  const sidebarItems: SidebarItem[] = [
+    { label: "Dashboard", icon: LayoutDashboard, onClick: () => setActiveView("overview") },
+    { label: "My Profile", icon: UserCog, onClick: () => setActiveView("profile") },
+    { label: "Appointments", icon: Calendar, onClick: () => setActiveView("appointments") },
+    { label: "AI Chats", icon: Bot, path: "/ai-chat" },
+    { label: "Medical Reports", icon: FileText, path: "/medical-reports" },
+    { label: "Feedback", icon: MessageSquareHeart, path: "/feedback" },
+    { label: "Support", icon: LifeBuoy, path: "/support" },
+  ];
 
   if (loading) {
     return (
@@ -86,83 +56,89 @@ const PatientDashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/30">
-      <Header />
-      <main className="container flex-1 py-8">
-        {/* Greeting + Profile Button */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <DashboardLayout title="Patient Dashboard" sidebarItems={sidebarItems}>
+      {activeView === "overview" && (
+        <div className="space-y-6">
+          {/* Greeting */}
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Welcome{profile ? `, ${profile.full_name}` : ""}!
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your health journey from one place.
-            </p>
+            <h2 className="text-2xl font-bold text-foreground">
+              Welcome back{profile ? `, ${profile.full_name}` : ""} 👋
+            </h2>
+            <p className="text-sm text-muted-foreground">Manage your health journey from one place.</p>
           </div>
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={() => setShowProfile(!showProfile)}
-          >
-            <User className="h-4 w-4" />
-            {showProfile ? "Hide Profile" : "My Profile"}
-          </Button>
-        </div>
 
-        {/* Profile Card */}
-        {showProfile && profile && (
-          <Card className="mb-8 border-primary/20">
+          {/* Stats */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Upcoming Appointments" value={0} icon={CalendarCheck} />
+            <StatCard label="AI Consultations" value={0} icon={Bot} />
+            <StatCard label="Medical Reports" value={0} icon={FileText} />
+            <StatCard label="Profile Completeness" value="100%" icon={User} />
+          </div>
+
+          {/* Quick actions */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: "Book Appointment", desc: "Schedule a consultation with a doctor", icon: CalendarCheck, action: () => setActiveView("appointments") },
+              { label: "AI Health Chat", desc: "Get instant health guidance from our AI", icon: Bot, action: () => navigate("/ai-chat") },
+              { label: "View Reports", desc: "Access your medical reports", icon: FileText, action: () => navigate("/medical-reports") },
+            ].map((item) => (
+              <Card key={item.label} className="group cursor-pointer transition-shadow hover:shadow-md" onClick={item.action}>
+                <CardContent className="flex items-center gap-4 p-5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                    <item.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeView === "profile" && profile && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">My Profile</h2>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="h-5 w-5 text-primary" /> Your Profile
+                <User className="h-5 w-5 text-primary" /> Personal Information
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Full Name</p>
-                  <p className="font-medium text-foreground">{profile.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-medium text-foreground">{profile.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Mobile</p>
-                  <p className="font-medium text-foreground">{profile.mobile_number}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Date of Birth</p>
-                  <p className="font-medium text-foreground">{profile.dob}</p>
-                </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[
+                  { label: "Full Name", value: profile.full_name },
+                  { label: "Email", value: profile.email },
+                  { label: "Mobile", value: profile.mobile_number },
+                  { label: "Date of Birth", value: profile.dob },
+                ].map((f) => (
+                  <div key={f.label}>
+                    <p className="text-xs text-muted-foreground">{f.label}</p>
+                    <p className="font-medium text-foreground">{f.value}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
-        )}
-
-        {/* Dashboard Action Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {dashboardItems.map((item) => (
-            <Card
-              key={item.label}
-              className="group cursor-pointer transition-shadow hover:shadow-md"
-              onClick={() => navigate(item.path)}
-            >
-              <CardContent className="flex items-center gap-4 p-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                  <item.icon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-              </CardContent>
-            </Card>
-          ))}
         </div>
-      </main>
-    </div>
+      )}
+
+      {activeView === "appointments" && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">My Appointments</h2>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <CalendarCheck className="mb-3 h-12 w-12 text-muted-foreground/40" />
+              <p className="text-muted-foreground">No appointments yet.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Book a consultation with a doctor to get started.</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </DashboardLayout>
   );
 };
 
